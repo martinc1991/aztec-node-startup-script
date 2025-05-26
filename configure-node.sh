@@ -84,6 +84,17 @@ else
     echo -e "\n${GREEN}${BOLD}Configuration completed.${RESET}"
 fi
 
+echo -e "\n${CYAN}${BOLD}---- STOPPING EXISTING CONTAINERS ----${RESET}\n"
+# Stop any existing Aztec containers that might be using port 8080
+if docker ps -q --filter "name=aztec" | grep -q .; then
+    echo -e "${LIGHTBLUE}${BOLD}Stopping existing Aztec containers...${RESET}"
+    docker stop $(docker ps -q --filter "name=aztec")
+    docker rm $(docker ps -aq --filter "name=aztec")
+    echo -e "${GREEN}${BOLD}Existing Aztec containers stopped and removed.${RESET}"
+else
+    echo -e "${GREEN}${BOLD}No existing Aztec containers found.${RESET}"
+fi
+
 echo -e "\n${CYAN}${BOLD}---- CHECKING PORT AVAILABILITY ----${RESET}\n"
 if netstat -tuln | grep -q ":8080 "; then
     echo -e "${LIGHTBLUE}${BOLD}Port 8080 is in use. Attempting to free it...${RESET}"
@@ -111,6 +122,8 @@ if screen -list | grep -q "\.aztec"; then
         echo -e "${LIGHTBLUE}${BOLD}If you want to start a new session later, first stop the existing one with: screen -S aztec -X quit${RESET}\n"
         exit 0
     fi
+else
+    echo -e "${GREEN}${BOLD}No existing 'aztec' screen session found. Proceeding with startup.${RESET}"
 fi
 
 echo -e "\n${CYAN}${BOLD}---- STARTING AZTEC NODE ----${RESET}\n"
@@ -131,7 +144,4 @@ EOL
 chmod +x $HOME/start_aztec_node.sh
 screen -dmS aztec $HOME/start_aztec_node.sh
 
-echo -e "${GREEN}${BOLD}Aztec node started successfully in a screen session.${RESET}\n"
-echo -e "${LIGHTBLUE}${BOLD}To view the node logs, run: screen -r aztec${RESET}"
-echo -e "${LIGHTBLUE}${BOLD}To detach from the screen session, press: Ctrl+A then D${RESET}"
-echo -e "${LIGHTBLUE}${BOLD}To stop the node, run: screen -S aztec -X quit${RESET}\n" 
+echo -e "${GREEN}${BOLD}Aztec node started successfully in a screen session.${RESET}\n" 
