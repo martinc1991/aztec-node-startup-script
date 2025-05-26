@@ -84,8 +84,6 @@ else
     echo -e "\n${GREEN}${BOLD}Configuration completed.${RESET}"
 fi
 
-echo -e "\n${CYAN}${BOLD}---- STARTING NODE ----${RESET}\n"
-echo -e "${LIGHTBLUE}${BOLD}Configuration complete. Starting the Aztec node...${RESET}"
-
-# Call the start-node script
-./start-node.sh 
+echo -e "\n${GREEN}${BOLD}Configuration completed successfully!${RESET}"
+echo -e "${LIGHTBLUE}${BOLD}Your settings have been saved to .env file.${RESET}"
+echo -e "${LIGHTBLUE}${BOLD}To start the node, run: ./start-node.sh${RESET}\n" 
