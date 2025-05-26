@@ -8,7 +8,7 @@ PURPLE='\033[1;35m'
 BOLD='\033[1m'
 RESET='\033[0m'
 
-curl -s https://raw.githubusercontent.com/zunxbt/logo/main/logo.sh | bash
+curl -s https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/refs/heads/main/wakeup-logo.sh | bash
 sleep 3
 
 echo -e "\n${CYAN}${BOLD}---- CHECKING DOCKER INSTALLATION ----${RESET}\n"
