@@ -76,6 +76,12 @@ This approach splits the installation into two steps for better control and reus
 [ -f "start-node.sh" ] && rm start-node.sh; curl -sSL -o start-node.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/start-node.sh && chmod +x start-node.sh && ./start-node.sh
 ```
 
+**Update environment configuration:**
+
+```bash
+[ -f "update-env.sh" ] && rm update-env.sh; curl -sSL -o update-env.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/update-env.sh && chmod +x update-env.sh && ./update-env.sh
+```
+
 **Stop the node:**
 
 ```bash
@@ -84,10 +90,11 @@ This approach splits the installation into two steps for better control and reus
 
 #### 🔧 Environment Configuration
 
-The modular setup supports environment file configuration:
+The modular setup supports flexible environment file configuration:
 
-- **First run**: The script will prompt for all required values and save them to `.env`
-- **Subsequent runs**: The script will load existing values from `.env` and only prompt for missing ones
+- **First run**: `configure-node.sh` will prompt for all required values and save them to `.env`
+- **Subsequent runs**: `configure-node.sh` will load existing values from `.env` and only prompt for missing ones
+- **Selective updates**: `update-env.sh` allows you to update specific variables while keeping others unchanged
 - **Manual configuration**: Create a `.env` file with your values to skip prompts entirely
 - **Direct start**: Use `start-node.sh` when you already have a configured `.env` file
 
@@ -104,8 +111,9 @@ COINBASE="0xYourWalletAddress"
 #### 📋 Script Overview
 
 - **`setup.sh`**: Installs Docker, dependencies, and Aztec toolkit (run once)
-- **`configure-node.sh`**: Configures environment variables and starts the node
+- **`configure-node.sh`**: Configures environment variables (creates `.env` file)
 - **`start-node.sh`**: Starts the node directly (requires existing `.env` file)
+- **`update-env.sh`**: Updates existing environment variables selectively
 - **`stop-node.sh`**: Stops the node, containers, and clears ports
 
 ## ⚡Commands
