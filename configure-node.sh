@@ -39,7 +39,7 @@ prompt_if_missing() {
         fi
         read -p "$prompt_text" value
         export $var_name="$value"
-        echo "$var_name=\"$value\"" >> .env
+        echo "export $var_name=\"$value\"" >> .env
     else
         echo -e "${GREEN}${BOLD}Using existing $var_name${RESET}"
     fi
@@ -48,7 +48,7 @@ prompt_if_missing() {
 echo -e "\n${CYAN}${BOLD}---- CONFIGURING NODE ----${RESET}\n"
 
 # Get IP address if not set
-if [ -z "$NODE_IP" ]; then
+if [ -z "$P2P_IP" ]; then
     IP=$(curl -s https://api.ipify.org)
     if [ -z "$IP" ]; then
         IP=$(curl -s http://checkip.amazonaws.com)
@@ -60,23 +60,29 @@ if [ -z "$NODE_IP" ]; then
         echo -e "${LIGHTBLUE}${BOLD}Could not determine IP address automatically.${RESET}"
         read -p "Please enter your VPS/WSL IP address: " IP
     fi
-    export NODE_IP="$IP"
-    echo "NODE_IP=\"$IP\"" >> .env
+    export P2P_IP="$IP"
+    echo "export P2P_IP=\"$IP\"" >> .env
 else
-    echo -e "${GREEN}${BOLD}Using existing NODE_IP: $NODE_IP${RESET}"
-    IP="$NODE_IP"
+    echo -e "${GREEN}${BOLD}Using existing P2P_IP: $P2P_IP${RESET}"
+    IP="$P2P_IP"
 fi
 
 # Prompt for missing environment variables
-prompt_if_missing "L1_RPC_URL" "Enter Your Sepolia Ethereum RPC URL: " "Visit ${PURPLE}https://dashboard.alchemy.com/apps${RESET}${LIGHTBLUE}${BOLD} or ${PURPLE}https://developer.metamask.io/register${RESET}${LIGHTBLUE}${BOLD} to create an account and get a Sepolia RPC URL."
+prompt_if_missing "ETHEREUM_HOSTS" "Enter Your Sepolia Ethereum RPC URL: " "Visit ${PURPLE}https://dashboard.alchemy.com/apps${RESET}${LIGHTBLUE}${BOLD} or ${PURPLE}https://developer.metamask.io/register${RESET}${LIGHTBLUE}${BOLD} to create an account and get a Sepolia RPC URL."
 
-prompt_if_missing "L1_CONSENSUS_URL" "Enter Your Sepolia Ethereum BEACON URL: " "Visit ${PURPLE}https://chainstack.com/global-nodes${RESET}${LIGHTBLUE}${BOLD} to create an account and get beacon RPC URL."
+prompt_if_missing "L1_CONSENSUS_HOST_URLS" "Enter Your Sepolia Ethereum BEACON URL: " "Visit ${PURPLE}https://chainstack.com/global-nodes${RESET}${LIGHTBLUE}${BOLD} to create an account and get beacon RPC URL."
 
 prompt_if_missing "VALIDATOR_PRIVATE_KEY" "Enter your new evm wallet private key (with 0x prefix): " "Please create a new EVM wallet, fund it with Sepolia Faucet and then provide the private key."
 
-prompt_if_missing "COINBASE_ADDRESS" "Enter the wallet address associated with the private key you just provided: " ""
+prompt_if_missing "COINBASE" "Enter the wallet address associated with the private key you just provided: " ""
 
-echo -e "\n${GREEN}${BOLD}Configuration saved to .env file.${RESET}"
+# Set secure permissions on .env file (readable/writable by owner only)
+if [ -f ".env" ]; then
+    chmod 600 .env
+    echo -e "\n${GREEN}${BOLD}Configuration saved to .env file with secure permissions (600).${RESET}"
+else
+    echo -e "\n${GREEN}${BOLD}Configuration completed.${RESET}"
+fi
 
 echo -e "\n${CYAN}${BOLD}---- CHECKING PORT AVAILABILITY ----${RESET}\n"
 if netstat -tuln | grep -q ":8080 "; then
@@ -114,10 +120,10 @@ export PATH=\$PATH:\$HOME/.aztec/bin
 aztec start --node --archiver --sequencer \
   --network alpha-testnet \
   --port 8080 \
-  --l1-rpc-urls "$L1_RPC_URL" \
-  --l1-consensus-host-urls "$L1_CONSENSUS_URL" \
+  --l1-rpc-urls "$ETHEREUM_HOSTS" \
+  --l1-consensus-host-urls "$L1_CONSENSUS_HOST_URLS" \
   --sequencer.validatorPrivateKey "$VALIDATOR_PRIVATE_KEY" \
-  --sequencer.coinbase "$COINBASE_ADDRESS" \
+  --sequencer.coinbase "$COINBASE" \
   --p2p.p2pIp "$IP" \
   --p2p.maxTxPoolSize 1000000000
 EOL
