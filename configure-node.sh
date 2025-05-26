@@ -84,64 +84,8 @@ else
     echo -e "\n${GREEN}${BOLD}Configuration completed.${RESET}"
 fi
 
-echo -e "\n${CYAN}${BOLD}---- STOPPING EXISTING CONTAINERS ----${RESET}\n"
-# Stop any existing Aztec containers that might be using port 8080
-if docker ps -q --filter "name=aztec" | grep -q .; then
-    echo -e "${LIGHTBLUE}${BOLD}Stopping existing Aztec containers...${RESET}"
-    docker stop $(docker ps -q --filter "name=aztec")
-    docker rm $(docker ps -aq --filter "name=aztec")
-    echo -e "${GREEN}${BOLD}Existing Aztec containers stopped and removed.${RESET}"
-else
-    echo -e "${GREEN}${BOLD}No existing Aztec containers found.${RESET}"
-fi
+echo -e "\n${CYAN}${BOLD}---- STARTING NODE ----${RESET}\n"
+echo -e "${LIGHTBLUE}${BOLD}Configuration complete. Starting the Aztec node...${RESET}"
 
-echo -e "\n${CYAN}${BOLD}---- CHECKING PORT AVAILABILITY ----${RESET}\n"
-if netstat -tuln | grep -q ":8080 "; then
-    echo -e "${LIGHTBLUE}${BOLD}Port 8080 is in use. Attempting to free it...${RESET}"
-    sudo fuser -k 8080/tcp
-    sleep 2
-    echo -e "${GREEN}${BOLD}Port 8080 has been freed successfully.${RESET}"
-else
-    echo -e "${GREEN}${BOLD}Port 8080 is already free and available.${RESET}"
-fi
-
-echo -e "\n${CYAN}${BOLD}---- CHECKING EXISTING SCREEN SESSIONS ----${RESET}\n"
-
-# Check if screen session 'aztec' already exists
-if screen -list | grep -q "\.aztec"; then
-    echo -e "${LIGHTBLUE}${BOLD}Found existing 'aztec' screen session.${RESET}"
-    read -p "Do you want to stop the existing session and start a new one? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${LIGHTBLUE}${BOLD}Stopping existing 'aztec' screen session...${RESET}"
-        screen -S aztec -X quit
-        sleep 2
-        echo -e "${GREEN}${BOLD}Existing session stopped.${RESET}"
-    else
-        echo -e "${PURPLE}${BOLD}Keeping existing session. You can attach to it with: screen -r aztec${RESET}"
-        echo -e "${LIGHTBLUE}${BOLD}If you want to start a new session later, first stop the existing one with: screen -S aztec -X quit${RESET}\n"
-        exit 0
-    fi
-else
-    echo -e "${GREEN}${BOLD}No existing 'aztec' screen session found. Proceeding with startup.${RESET}"
-fi
-
-echo -e "\n${CYAN}${BOLD}---- STARTING AZTEC NODE ----${RESET}\n"
-cat > $HOME/start_aztec_node.sh << EOL
-#!/bin/bash
-export PATH=\$PATH:\$HOME/.aztec/bin
-aztec start --node --archiver --sequencer \
-  --network alpha-testnet \
-  --port 8080 \
-  --l1-rpc-urls "$ETHEREUM_HOSTS" \
-  --l1-consensus-host-urls "$L1_CONSENSUS_HOST_URLS" \
-  --sequencer.validatorPrivateKey "$VALIDATOR_PRIVATE_KEY" \
-  --sequencer.coinbase "$COINBASE" \
-  --p2p.p2pIp "$IP" \
-  --p2p.maxTxPoolSize 1000000000
-EOL
-
-chmod +x $HOME/start_aztec_node.sh
-screen -dmS aztec $HOME/start_aztec_node.sh
-
-echo -e "${GREEN}${BOLD}Aztec node started successfully in a screen session.${RESET}\n" 
+# Call the start-node script
+./start-node.sh 

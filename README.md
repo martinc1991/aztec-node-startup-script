@@ -70,23 +70,43 @@ This approach splits the installation into two steps for better control and reus
 [ -f "configure-node.sh" ] && rm configure-node.sh; curl -sSL -o configure-node.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/configure-node.sh && chmod +x configure-node.sh && ./configure-node.sh
 ```
 
+**Step 3 (Optional): Start node directly (if you already have .env configured):**
+
+```bash
+[ -f "start-node.sh" ] && rm start-node.sh; curl -sSL -o start-node.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/start-node.sh && chmod +x start-node.sh && ./start-node.sh
+```
+
+**Stop the node:**
+
+```bash
+[ -f "stop-node.sh" ] && rm stop-node.sh; curl -sSL -o stop-node.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/stop-node.sh && chmod +x stop-node.sh && ./stop-node.sh
+```
+
 #### 🔧 Environment Configuration
 
 The modular setup supports environment file configuration:
 
 - **First run**: The script will prompt for all required values and save them to `.env`
 - **Subsequent runs**: The script will load existing values from `.env` and only prompt for missing ones
-- **Manual configuration**: Copy `env.example` to `.env` and fill in your values to skip prompts
+- **Manual configuration**: Create a `.env` file with your values to skip prompts entirely
+- **Direct start**: Use `start-node.sh` when you already have a configured `.env` file
 
 Example `.env` file:
 
 ```bash
-NODE_IP="your.server.ip"
-L1_RPC_URL="https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY"
-L1_CONSENSUS_URL="https://nd-123-456-789.p2pify.com/YOUR_API_KEY"
+P2P_IP="your.server.ip"
+ETHEREUM_HOSTS="https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY"
+L1_CONSENSUS_HOST_URLS="https://nd-123-456-789.p2pify.com/YOUR_API_KEY"
 VALIDATOR_PRIVATE_KEY="0x1234567890abcdef..."
-COINBASE_ADDRESS="0xYourWalletAddress"
+COINBASE="0xYourWalletAddress"
 ```
+
+#### 📋 Script Overview
+
+- **`setup.sh`**: Installs Docker, dependencies, and Aztec toolkit (run once)
+- **`configure-node.sh`**: Configures environment variables and starts the node
+- **`start-node.sh`**: Starts the node directly (requires existing `.env` file)
+- **`stop-node.sh`**: Stops the node, containers, and clears ports
 
 ## ⚡Commands
 
