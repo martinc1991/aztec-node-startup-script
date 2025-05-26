@@ -34,6 +34,8 @@ Aztec is building a decentralized, privacy-focused network and the sequencer nod
 
 > [!Tip] > **You can watch this [video](https://youtu.be/2mBIRmMPSEM?si=TG5MRwQyZ5XqcfLI) to learn how to set up aztec sequencer node very easily.**
 
+### Option 1: Quick Setup (Original Method)
+
 - Install `curl` and `wget` first
 
 ```bash
@@ -49,7 +51,41 @@ Aztec is building a decentralized, privacy-focused network and the sequencer nod
 or
 
 ```
-[ -f "aztec.sh" ] && rm aztec.sh; wget -q -O aztec.sh https://raw.githubusercontent.com/zunxbt/aztec-sequencer-node/main/aztec.sh && chmod +x aztec.sh && ./aztec.sh
+[ -f "aztec.sh" ] && rm aztec.sh; wget -q -O aztec.sh https://raw.githubusercontent.com/martinc1991/aztec-sequencer-node/main/aztec.sh && chmod +x aztec.sh && ./aztec.sh
+```
+
+### Option 2: Modular Setup (Recommended)
+
+This approach splits the installation into two steps for better control and reusability:
+
+**Step 1: Download and run setup (one-time installation):**
+
+```bash
+[ -f "setup.sh" ] && rm setup.sh; curl -sSL -o setup.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/setup.sh && chmod +x setup.sh && ./setup.sh
+```
+
+**Step 2: Download and run node configuration:**
+
+```bash
+[ -f "configure-node.sh" ] && rm configure-node.sh; curl -sSL -o configure-node.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/configure-node.sh && chmod +x configure-node.sh && ./configure-node.sh
+```
+
+#### 🔧 Environment Configuration
+
+The modular setup supports environment file configuration:
+
+- **First run**: The script will prompt for all required values and save them to `.env`
+- **Subsequent runs**: The script will load existing values from `.env` and only prompt for missing ones
+- **Manual configuration**: Copy `env.example` to `.env` and fill in your values to skip prompts
+
+Example `.env` file:
+
+```bash
+NODE_IP="your.server.ip"
+L1_RPC_URL="https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY"
+L1_CONSENSUS_URL="https://nd-123-456-789.p2pify.com/YOUR_API_KEY"
+VALIDATOR_PRIVATE_KEY="0x1234567890abcdef..."
+COINBASE_ADDRESS="0xYourWalletAddress"
 ```
 
 ## ⚡Commands
