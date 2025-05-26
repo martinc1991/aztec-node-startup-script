@@ -88,6 +88,25 @@ else
     echo -e "${GREEN}${BOLD}Port 8080 is already free and available.${RESET}"
 fi
 
+echo -e "\n${CYAN}${BOLD}---- CHECKING EXISTING SCREEN SESSIONS ----${RESET}\n"
+
+# Check if screen session 'aztec' already exists
+if screen -list | grep -q "\.aztec"; then
+    echo -e "${LIGHTBLUE}${BOLD}Found existing 'aztec' screen session.${RESET}"
+    read -p "Do you want to stop the existing session and start a new one? (y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${LIGHTBLUE}${BOLD}Stopping existing 'aztec' screen session...${RESET}"
+        screen -S aztec -X quit
+        sleep 2
+        echo -e "${GREEN}${BOLD}Existing session stopped.${RESET}"
+    else
+        echo -e "${PURPLE}${BOLD}Keeping existing session. You can attach to it with: screen -r aztec${RESET}"
+        echo -e "${LIGHTBLUE}${BOLD}If you want to start a new session later, first stop the existing one with: screen -S aztec -X quit${RESET}\n"
+        exit 0
+    fi
+fi
+
 echo -e "\n${CYAN}${BOLD}---- STARTING AZTEC NODE ----${RESET}\n"
 cat > $HOME/start_aztec_node.sh << EOL
 #!/bin/bash
