@@ -132,7 +132,16 @@ if [ -n "$new_beacon_url" ]; then
     updated_vars+=("L1_CONSENSUS_HOST_URLS")
 else
     if [ -n "$L1_CONSENSUS_HOST_URLS" ]; then
-        echo -e "${LIGHTBLUE}${BOLD}✓ Keeping existing L1_CONSENSUS_HOST_URLS${RESET}\n"
+        # Check if backup URLs are already present
+        if [[ "$L1_CONSENSUS_HOST_URLS" != *"sepolia.beaconcha.in"* ]] || [[ "$L1_CONSENSUS_HOST_URLS" != *"ethereum-sepolia-beacon-api.publicnode.com"* ]]; then
+            # Add backup URLs to existing value
+            L1_CONSENSUS_HOST_URLS="${L1_CONSENSUS_HOST_URLS},https://sepolia.beaconcha.in,https://ethereum-sepolia-beacon-api.publicnode.com"
+            export L1_CONSENSUS_HOST_URLS="$L1_CONSENSUS_HOST_URLS"
+            echo -e "${GREEN}${BOLD}✓ Added backup endpoints to existing L1_CONSENSUS_HOST_URLS${RESET}\n"
+            updated_vars+=("L1_CONSENSUS_HOST_URLS")
+        else
+            echo -e "${LIGHTBLUE}${BOLD}✓ Keeping existing L1_CONSENSUS_HOST_URLS (backup endpoints already present)${RESET}\n"
+        fi
     else
         echo -e "${PURPLE}${BOLD}⚠ No value provided for L1_CONSENSUS_HOST_URLS (will be empty)${RESET}\n"
     fi
