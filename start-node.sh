@@ -103,7 +103,7 @@ aztec start --node --archiver --sequencer \
   --sequencer.validatorPrivateKey "$VALIDATOR_PRIVATE_KEY" \
   --sequencer.coinbase "$COINBASE" \
   --p2p.p2pIp "$P2P_IP" \
-  --p2p.maxTxPoolSize 1000000000 \
+  --p2p.maxTxPoolSize 1000000000
 EOL
 
 chmod +x $HOME/start_aztec_node.sh
