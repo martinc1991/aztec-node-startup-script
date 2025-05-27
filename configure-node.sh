@@ -76,6 +76,15 @@ prompt_if_missing "VALIDATOR_PRIVATE_KEY" "Enter your new evm wallet private key
 
 prompt_if_missing "COINBASE" "Enter the wallet address associated with the private key you just provided: " ""
 
+# Add hardcoded BLOB_SINK_ARCHIVE_API_URL if not already set
+if [ -z "$BLOB_SINK_ARCHIVE_API_URL" ]; then
+    export BLOB_SINK_ARCHIVE_API_URL="https://api.blobscan.com"
+    echo "export BLOB_SINK_ARCHIVE_API_URL=\"https://api.blobscan.com\"" >> .env
+    echo -e "${GREEN}${BOLD}Added BLOB_SINK_ARCHIVE_API_URL: https://api.blobscan.com${RESET}"
+else
+    echo -e "${GREEN}${BOLD}Using existing BLOB_SINK_ARCHIVE_API_URL: $BLOB_SINK_ARCHIVE_API_URL${RESET}"
+fi
+
 # Set secure permissions on .env file (readable/writable by owner only)
 if [ -f ".env" ]; then
     chmod 600 .env
