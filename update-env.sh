@@ -14,13 +14,13 @@ echo -e "\n${CYAN}${BOLD}---- UPDATING ENVIRONMENT CONFIGURATION ----${RESET}\n"
 if [ ! -f ".env" ]; then
     echo -e "${PURPLE}${BOLD}No .env file found. Creating new configuration...${RESET}\n"
     
-    # Auto-detect P2P_IP
-    echo -e "${LIGHTBLUE}${BOLD}Auto-detecting your IP address...${RESET}"
-    P2P_IP=$(curl -s ifconfig.me 2>/dev/null || curl -s ipinfo.io/ip 2>/dev/null || echo "")
+    # Auto-detect P2P_IP from AWS
+    echo -e "${LIGHTBLUE}${BOLD}Auto-detecting your IP address from AWS...${RESET}"
+    P2P_IP=$(curl -s --connect-timeout 5 http://checkip.amazonaws.com 2>/dev/null)
     if [ -n "$P2P_IP" ]; then
         echo -e "${GREEN}${BOLD}Detected IP: $P2P_IP${RESET}\n"
     else
-        echo -e "${PURPLE}${BOLD}Could not auto-detect IP. You'll need to provide it manually.${RESET}\n"
+        echo -e "${PURPLE}${BOLD}Could not auto-detect IP from AWS. You'll need to provide it manually.${RESET}\n"
     fi
     
     # Initialize empty variables for new configuration
@@ -38,6 +38,23 @@ else
     # Create backup of existing .env
     cp .env .env.backup
     echo -e "${LIGHTBLUE}${BOLD}Backup created: .env.backup${RESET}\n"
+    
+    # Always update P2P_IP from AWS
+    echo -e "${LIGHTBLUE}${BOLD}Updating P2P_IP from AWS...${RESET}"
+    OLD_P2P_IP="$P2P_IP"
+    NEW_P2P_IP=$(curl -s --connect-timeout 5 http://checkip.amazonaws.com 2>/dev/null)
+    
+    if [ -n "$NEW_P2P_IP" ]; then
+        if [ "$OLD_P2P_IP" != "$NEW_P2P_IP" ]; then
+            echo -e "${PURPLE}${BOLD}P2P_IP changed: $OLD_P2P_IP → $NEW_P2P_IP${RESET}"
+        else
+            echo -e "${GREEN}${BOLD}P2P_IP unchanged: $NEW_P2P_IP${RESET}"
+        fi
+        P2P_IP="$NEW_P2P_IP"
+    else
+        echo -e "${RED}${BOLD}Failed to fetch new P2P_IP from AWS, keeping existing: $OLD_P2P_IP${RESET}"
+    fi
+    echo
 fi
 
 
@@ -84,12 +101,9 @@ echo -e "${LIGHTBLUE}${BOLD}For each setting, provide a new value to update it, 
 # Track which variables were updated
 updated_vars=()
 
-# Handle P2P_IP if auto-detection failed or user wants to override
-if [ -z "$P2P_IP" ]; then
-    echo -e "${CYAN}${BOLD}0. P2P IP Address${RESET}"
-    if update_env_var "P2P_IP" "Enter your VPS/WSL IP address: " "This is the public IP address of your server/VPS."; then
-        updated_vars+=("P2P_IP")
-    fi
+# P2P_IP is automatically updated from AWS, add it to updated vars if it was changed
+if [ -n "$NEW_P2P_IP" ] && [ "$OLD_P2P_IP" != "$NEW_P2P_IP" ]; then
+    updated_vars+=("P2P_IP")
 fi
 
 # Update ETHEREUM_HOSTS
