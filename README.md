@@ -2,109 +2,237 @@
 
 Aztec is building a decentralized, privacy-focused network and the sequencer node is a key part of it. Running a sequencer helps produce and propose blocks using regular consumer hardware. This guide will walk you through setting one up on the testnet.
 
-**Note : There’s no official confirmation of any rewards, airdrop, or incentives. This is purely for learning, contribution and being early in a cutting-edge privacy project.**
+**Note: There's no official confirmation of any rewards, airdrop, or incentives. This is purely for learning, contribution and being early in a cutting-edge privacy project.**
 
-## 💻 System Requirements
+## 📋 Table of Contents
 
-| Component      | Specification             |
-| -------------- | ------------------------- |
-| CPU            | 8-core Processor          |
-| RAM            | 16 GiB                    |
-| Storage        | 1 TB SSD                  |
-| Internet Speed | 25 Mbps Upload / Download |
+- [🚀 Quick Start (First Time Setup)](#-quick-start-first-time-setup)
+- [🎯 Get Discord Apprentice Role](#-get-discord-apprentice-role)
+- [🚀 Register as Validator](#-register-as-validator)
+- [📋 Quick Reference Commands](#-quick-reference-commands)
+- [📖 Detailed Guide](#-detailed-guide)
+  - [Getting Apprentice Role on Discord](#getting-apprentice-role-on-discord)
+  - [Validator Registration](#validator-registration-1)
+  - [Environment Configuration](#environment-configuration)
+  - [Script Overview](#script-overview)
+  - [Troubleshooting](#troubleshooting)
 
-> [!Note] > **You can start running this node on a `4-core CPU`, `6 GB of RAM` and `25 GB of storage`. However, as uptime increases, it's important to meet the recommended system requirements—otherwise, your node may eventually crash.**
+---
 
-## 🌐 Rent VPS
+## 🚀 Quick Start (First Time Setup)
 
-> [!Note] > **Renting VPS is not necessarily needed if your main goal is to take `Apprentice` role on Aztec Discord, You can run this node on WSL for 30 mins to get that role**
+> **Watch the [setup video](https://youtu.be/2mBIRmMPSEM?si=TG5MRwQyZ5XqcfLI) for a visual walkthrough**
 
-- Visit : [PQ Hosting](https://pq.hosting/?from=622403&lang=en) (high price but crypto payment supported) or [contabo](https://contabo.com/en) or [hetzner](https://www.hetzner.com/cloud) to rent a VPS
-  > [!Tip] > **If you don't know what a VPS is or how to buy one, you should watch [this video](https://youtu.be/vNBlRMnHggA?si=G1huqYU3ylCGoTQE) on my YouTube channel.**
+### Prerequisites
 
-## ⚙️ Prerequisites
+**System Requirements:**
 
-- You can use [Alchemy](https://dashboard.alchemy.com/apps) or [Infura](https://developer.metamask.io/register) to get Sepolia Ethereum RPC.
-- You can use [Chainstack](https://chainstack.com/global-nodes) to get the Consensus URL (Beacon RPC URL).
-- Create a new evm wallet and fund it with at least 2.5 Sepolia ETH if you want to register as Validator.
+| Component      | Minimum Required          | Recommended               |
+| -------------- | ------------------------- | ------------------------- |
+| CPU            | 4-core Processor          | 8-core Processor          |
+| RAM            | 6 GiB                     | 16 GiB                    |
+| Storage        | 25 GB SSD                 | 1 TB SSD                  |
+| Internet Speed | 25 Mbps Upload / Download | 25 Mbps Upload / Download |
 
-> [!IMPORTANT] > **If you're using the free version and reach the maximum request limit on either the Sepolia Ethereum RPC or the Sepolia Consensus (Beacon RPC) URL, you'll need to either upgrade to a premium plan or change the RPC endpoint each time you hit the limit.**
+> **Note:** You can start with minimum requirements, but upgrade to recommended specs for stable long-term operation.
 
-## 📥 Installation
+**Before starting, you'll also need:**
 
-> [!Tip] > **You can watch this [video](https://youtu.be/2mBIRmMPSEM?si=TG5MRwQyZ5XqcfLI) to learn how to set up aztec sequencer node very easily.**
+- **RPC URLs**: Get Sepolia Ethereum RPC from [Alchemy](https://dashboard.alchemy.com/apps) or [Infura](https://developer.metamask.io/register)
+- **Beacon URL**: Get Consensus URL from [Chainstack](https://chainstack.com/global-nodes)
+- **Wallet**: Create a new EVM wallet and fund it with some Sepolia ETH (for validator registration)
 
-### Option 1: Quick Setup (Original Method)
+### Installation Commands
 
-- Install `curl` and `wget` first
+Copy and paste these commands in order:
 
-```bash
-(command -v curl >/dev/null 2>&1 && command -v wget >/dev/null 2>&1) || sudo apt-get update; command -v curl >/dev/null 2>&1 || sudo apt-get install -y curl; command -v wget >/dev/null 2>&1 || sudo apt-get install -y wget
-```
-
-- Execute either of the following commands to run your Aztec node
-
-```
-[ -f "aztec.sh" ] && rm aztec.sh; curl -sSL -o aztec.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/aztec.sh && chmod +x aztec.sh && ./aztec.sh
-```
-
-or
-
-```
-[ -f "aztec.sh" ] && rm aztec.sh; wget -q -O aztec.sh https://raw.githubusercontent.com/martinc1991/aztec-sequencer-node/main/aztec.sh && chmod +x aztec.sh && ./aztec.sh
-```
-
-### Option 2: Modular Setup (Recommended)
-
-This approach splits the installation into two steps for better control and reusability:
-
-**Step 1: Download and run setup (one-time installation):**
+**1. Install dependencies and Aztec toolkit:**
 
 ```bash
 [ -f "setup.sh" ] && rm setup.sh; curl -sSL -o setup.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/setup.sh && chmod +x setup.sh && ./setup.sh
 ```
 
-**Step 2: Download and run node configuration:**
+**2. Configure your node:**
 
 ```bash
 [ -f "configure-node.sh" ] && rm configure-node.sh; curl -sSL -o configure-node.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/configure-node.sh && chmod +x configure-node.sh && ./configure-node.sh
 ```
 
-**Step 3 (Optional): Start node directly (if you already have .env configured):**
+**3. Start your node:**
 
 ```bash
 [ -f "start-node.sh" ] && rm start-node.sh; curl -sSL -o start-node.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/start-node.sh && chmod +x start-node.sh && ./start-node.sh
 ```
 
-**Update environment configuration:**
+That's it! Your node is now running. 🎉
 
-```bash
-[ -f "update-env.sh" ] && rm update-env.sh; curl -sSL -o update-env.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/update-env.sh && chmod +x update-env.sh && ./update-env.sh
-```
+**4. Register as validator (after ~20 min sync):**
 
-**Register as validator (requires .env configuration):**
+Once your node is running, you can register as a validator to participate in block production:
+
+> **⏱️ Important:** Wait approximately 20 minutes for your node to fully synchronize before registering as a validator. You can check the sync status by monitoring the logs.
 
 ```bash
 [ -f "register-validator.sh" ] && rm register-validator.sh; curl -sSL -o register-validator.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/register-validator.sh && chmod +x register-validator.sh && ./register-validator.sh
 ```
 
-**Stop the node:**
+> **Note:** There's a daily quota of 10 new validators per 24 hours. If you see a `ValidatorQuotaFilledUntil` error, you'll need to wait until the next quota period.
+
+---
+
+## 🎯 Get Discord Apprentice Role
+
+After your node runs for 10-20 minutes:
+
+**1. Get block number:**
+
+```bash
+curl -s -X POST -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' http://localhost:8080 | jq -r '.result.proven.number'
+```
+
+**2. Get proof (replace BLOCK_NUMBER with the number from step 1):**
+
+```bash
+curl -s -X POST -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","method":"node_getArchiveSiblingPath","params":["BLOCK_NUMBER","BLOCK_NUMBER"],"id":67}' http://localhost:8080 | jq -r ".result"
+```
+
+**3. Submit to Discord:**
+
+- Join [Aztec Discord](https://discord.com/invite/aztec)
+- Go to `#operators-start-here` channel
+- Use command: `/operator start`
+- Provide: wallet address, block number, and proof
+
+---
+
+## 🚀 Register as Validator
+
+> **Warning:** Daily quota is 10 new validators per 24 hours. If you see `ValidatorQuotaFilledUntil` error, convert the Unix timestamp to know when to retry.
+
+**Automated registration (recommended):**
+
+```bash
+[ -f "register-validator.sh" ] && rm register-validator.sh; curl -sSL -o register-validator.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/register-validator.sh && chmod +x register-validator.sh && ./register-validator.sh
+```
+
+---
+
+## 📋 Quick Reference Commands
+
+### Initial Setup
+
+**Install dependencies and Aztec toolkit:**
+
+```bash
+[ -f "setup.sh" ] && rm setup.sh; curl -sSL -o setup.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/setup.sh && chmod +x setup.sh && ./setup.sh
+```
+
+**Configure your node:**
+
+```bash
+[ -f "configure-node.sh" ] && rm configure-node.sh; curl -sSL -o configure-node.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/configure-node.sh && chmod +x configure-node.sh && ./configure-node.sh
+```
+
+**Start/Restart your node:**
+
+```bash
+[ -f "start-node.sh" ] && rm start-node.sh; curl -sSL -o start-node.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/start-node.sh && chmod +x start-node.sh && ./start-node.sh
+```
+
+### Node Management
+
+**Check node logs:**
+
+```bash
+sudo docker logs -f --tail 100 $(docker ps -q --filter ancestor=aztecprotocol/aztec:latest | head -n 1)
+```
+
+**Update configuration:**
+
+```bash
+[ -f "update-env.sh" ] && rm update-env.sh; curl -sSL -o update-env.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/update-env.sh && chmod +x update-env.sh && ./update-env.sh
+```
+
+**Stop node:**
 
 ```bash
 [ -f "stop-node.sh" ] && rm stop-node.sh; curl -sSL -o stop-node.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/stop-node.sh && chmod +x stop-node.sh && ./stop-node.sh
 ```
 
-#### 🔧 Environment Configuration
+### Validator Registration
 
-The modular setup supports flexible environment file configuration:
+**Register as validator:**
 
-- **First run**: `configure-node.sh` will prompt for all required values and save them to `.env`
-- **Subsequent runs**: `configure-node.sh` will load existing values from `.env` and only prompt for missing ones
-- **Selective updates**: `update-env.sh` allows you to update specific variables while keeping others unchanged
-- **Manual configuration**: Create a `.env` file with your values to skip prompts entirely
-- **Direct start**: Use `start-node.sh` when you already have a configured `.env` file
+```bash
+[ -f "register-validator.sh" ] && rm register-validator.sh; curl -sSL -o register-validator.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/register-validator.sh && chmod +x register-validator.sh && ./register-validator.sh
+```
 
-Example `.env` file:
+### Discord Apprentice Role
+
+**Get block number:**
+
+```bash
+curl -s -X POST -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' http://localhost:8080 | jq -r '.result.proven.number'
+```
+
+**Get proof (replace BLOCK_NUMBER):**
+
+```bash
+curl -s -X POST -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","method":"node_getArchiveSiblingPath","params":["BLOCK_NUMBER","BLOCK_NUMBER"],"id":67}' http://localhost:8080 | jq -r ".result"
+```
+
+---
+
+## 📖 Detailed Guide
+
+### Getting Apprentice Role on Discord
+
+After your node runs for 10-20 minutes:
+
+1. **Get block number:**
+
+   ```bash
+   curl -s -X POST -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' http://localhost:8080 | jq -r '.result.proven.number'
+   ```
+
+2. **Get proof** (replace `BLOCK_NUMBER`):
+
+   ```bash
+   curl -s -X POST -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","method":"node_getArchiveSiblingPath","params":["BLOCK_NUMBER","BLOCK_NUMBER"],"id":67}' http://localhost:8080 | jq -r ".result"
+   ```
+
+3. **Submit to Discord:**
+   - Join [Aztec Discord](https://discord.com/invite/aztec)
+   - Go to `#operators-start-here` channel
+   - Use command: `/operator start`
+   - Provide: wallet address, block number, and proof
+
+### Validator Registration
+
+> **Warning:** Daily quota is 10 new validators per 24 hours. If you see `ValidatorQuotaFilledUntil` error, convert the Unix timestamp to know when to retry.
+
+**Option 1: Automated (Recommended)**
+
+```bash
+./register-validator.sh
+```
+
+**Option 2: Manual**
+Replace the environment variables with actual values:
+
+```bash
+aztec add-l1-validator \
+  --l1-rpc-urls ETHEREUM_HOSTS \
+  --private-key VALIDATOR_PRIVATE_KEY \
+  --attester COINBASE \
+  --proposer-eoa COINBASE \
+  --staking-asset-handler 0xF739D03e98e23A7B65940848aBA8921fF3bAc4b2 \
+  --l1-chain-id 11155111
+```
+
+### Environment Configuration
+
+The setup creates a `.env` file with your configuration:
 
 ```bash
 P2P_IP="your.server.ip"
@@ -114,89 +242,31 @@ VALIDATOR_PRIVATE_KEY="0x1234567890abcdef..."
 COINBASE="0xYourWalletAddress"
 ```
 
-#### 📋 Script Overview
+**Configuration Features:**
 
-- **`setup.sh`**: Installs Docker, dependencies, and Aztec toolkit (run once)
-- **`configure-node.sh`**: Configures environment variables (creates `.env` file)
-- **`start-node.sh`**: Starts the node directly (requires existing `.env` file)
-- **`register-validator.sh`**: Registers as validator using environment variables from `.env` file
-- **`update-env.sh`**: Updates existing environment variables selectively
-- **`stop-node.sh`**: Stops the node, containers, and clears ports
+- **First run**: Prompts for all values and saves to `.env`
+- **Subsequent runs**: Loads existing values, only prompts for missing ones
+- **Selective updates**: Use `update-env.sh` to change specific variables
+- **Manual setup**: Create `.env` file manually to skip prompts
 
-## ⚡Commands
+### Script Overview
 
-- You can use this command to check logs of your node
+| Script                  | Purpose                                                     |
+| ----------------------- | ----------------------------------------------------------- |
+| `setup.sh`              | Installs Docker, dependencies, and Aztec toolkit (run once) |
+| `configure-node.sh`     | Sets up environment variables (creates `.env` file)         |
+| `start-node.sh`         | Starts the node (requires `.env` file)                      |
+| `register-validator.sh` | Registers as validator using `.env` configuration           |
+| `update-env.sh`         | Updates specific environment variables                      |
+| `stop-node.sh`          | Stops node, containers, and clears ports                    |
 
-```
-sudo docker logs -f --tail 100 $(docker ps -q --filter ancestor=aztecprotocol/aztec:latest | head -n 1)
-```
+### Troubleshooting
 
-- You can stop this node using this command
+**RPC Rate Limits:**
+If using free RPC services and hitting limits, either upgrade to premium or change endpoints.
 
-```
-sudo docker stop $(docker ps -q --filter ancestor=aztecprotocol/aztec:latest | head -n 1)
-```
+**Node Issues:**
 
-## 🧩 Post-Installation
-
-> [!Note] > **After running node, you should wait at least 10 to 20 mins before your run these commands**
-
-- Use this command to get `block-number`
-
-```
-curl -s -X POST -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' http://localhost:8080 | jq -r '.result.proven.number'
-```
-
-- After running this code, you will get a block number like this : 66666
-
-- Use that block number in the places of `block-number` in the below command to get `proof`
-
-![Screenshot 2025-05-02 120017](https://github.com/user-attachments/assets/ed5ba08e-a1a9-48bc-8518-b23211ac7588)
-
-```
-curl -s -X POST -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","method":"node_getArchiveSiblingPath","params":["block-number","block-number"],"id":67}' http://localhost:8080 | jq -r ".result"
-```
-
-- Now navigate to `operators | start-here` channel in [Aztec Discord Server](https://discord.com/invite/aztec)
-- Use the following command to get `Apprentice` role
-
-```
-/operator start
-```
-
-- It will ask the `address` , `block-number` and `proof` , Enter all of them one by one and you will get `Apprentice` instantly
-
-## 🚀 Register as Validator
-
-> [!WARNING]
-> You may see an error like `ValidatorQuotaFilledUntil` when trying to register as a validator, which means the daily quota has been reached—convert the provided Unix timestamp to local time to know when you can try again to register as Validator.
-
-### Option 1: Automated Registration (Recommended)
-
-If you have already configured your environment using `configure-node.sh`, you can use the automated registration script:
-
-```bash
-./register-validator.sh
-```
-
-This script will:
-
-- Load your configuration from the `.env` file
-- Verify all required environment variables are present
-- Display the configuration that will be used
-- Ask for confirmation before proceeding
-- Execute the registration command automatically
-
-### Option 2: Manual Registration
-
-- Replace `SEPOLIA-RPC-URL` , `YOUR-PRIVATE-KEY` , `YOUR-VALIDATOR-ADDRESS` with actual value and then execute this command
-
-```
-aztec add-l1-validator \
-  --l1-rpc-urls SEPOLIA-RPC-URL \
-  --private-key YOUR-PRIVATE-KEY \
-  --attester YOUR-VALIDATOR-ADDRESS \
-  --proposer-eoa YOUR-VALIDATOR-ADDRESS \
-  --staking-asset-handler 0xF739D03e98e23A7B65940848aBA8921fF3bAc4b2 \
-  --l1-chain-id 11155111
-```
+- Check logs: `sudo docker logs -f --tail 100 $(docker ps -q --filter ancestor=aztecprotocol/aztec:latest | head -n 1)`
+- Restart node: Use the restart command from Quick Reference
+- Check system resources meet minimum requirements
