@@ -51,7 +51,7 @@ echo -e "\n${CYAN}${BOLD}---- VALIDATOR REGISTRATION ----${RESET}\n"
 echo -e "${LIGHTBLUE}${BOLD}Registration Configuration:${RESET}"
 echo -e "${LIGHTBLUE}  • Ethereum RPC: ${ETHEREUM_HOSTS}${RESET}"
 echo -e "${LIGHTBLUE}  • Validator Address: ${COINBASE}${RESET}"
-echo -e "${LIGHTBLUE}  • Private Key: ${VALIDATOR_PRIVATE_KEY:0:10}...${RESET}"
+echo -e "${LIGHTBLUE}  • Private Key: ...${VALIDATOR_PRIVATE_KEY: -10}${RESET}"
 
 echo -e "\n${PURPLE}${BOLD}WARNING: You may see an error like 'ValidatorQuotaFilledUntil' when trying to register as a validator,${RESET}"
 echo -e "${PURPLE}${BOLD}which means the daily quota has been reached. Convert the provided Unix timestamp to local time${RESET}"
