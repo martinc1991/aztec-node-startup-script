@@ -104,7 +104,6 @@ aztec start --node --archiver --sequencer \
   --sequencer.coinbase "$COINBASE" \
   --p2p.p2pIp "$P2P_IP" \
   --p2p.maxTxPoolSize 1000000000 \
-  --blob-sink-archive-api-url "$BLOB_SINK_ARCHIVE_API_URL"
 EOL
 
 chmod +x $HOME/start_aztec_node.sh
