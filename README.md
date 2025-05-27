@@ -82,6 +82,12 @@ This approach splits the installation into two steps for better control and reus
 [ -f "update-env.sh" ] && rm update-env.sh; curl -sSL -o update-env.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/update-env.sh && chmod +x update-env.sh && ./update-env.sh
 ```
 
+**Register as validator (requires .env configuration):**
+
+```bash
+[ -f "register-validator.sh" ] && rm register-validator.sh; curl -sSL -o register-validator.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/register-validator.sh && chmod +x register-validator.sh && ./register-validator.sh
+```
+
 **Stop the node:**
 
 ```bash
@@ -113,6 +119,7 @@ COINBASE="0xYourWalletAddress"
 - **`setup.sh`**: Installs Docker, dependencies, and Aztec toolkit (run once)
 - **`configure-node.sh`**: Configures environment variables (creates `.env` file)
 - **`start-node.sh`**: Starts the node directly (requires existing `.env` file)
+- **`register-validator.sh`**: Registers as validator using environment variables from `.env` file
 - **`update-env.sh`**: Updates existing environment variables selectively
 - **`stop-node.sh`**: Stops the node, containers, and clears ports
 
@@ -163,6 +170,24 @@ curl -s -X POST -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","method
 
 > [!WARNING]
 > You may see an error like `ValidatorQuotaFilledUntil` when trying to register as a validator, which means the daily quota has been reached—convert the provided Unix timestamp to local time to know when you can try again to register as Validator.
+
+### Option 1: Automated Registration (Recommended)
+
+If you have already configured your environment using `configure-node.sh`, you can use the automated registration script:
+
+```bash
+./register-validator.sh
+```
+
+This script will:
+
+- Load your configuration from the `.env` file
+- Verify all required environment variables are present
+- Display the configuration that will be used
+- Ask for confirmation before proceeding
+- Execute the registration command automatically
+
+### Option 2: Manual Registration
 
 - Replace `SEPOLIA-RPC-URL` , `YOUR-PRIVATE-KEY` , `YOUR-VALIDATOR-ADDRESS` with actual value and then execute this command
 
