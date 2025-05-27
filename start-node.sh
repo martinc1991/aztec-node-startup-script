@@ -56,6 +56,9 @@ echo -e "\n${LIGHTBLUE}${BOLD}Validator Configuration:${RESET}"
 echo -e "${LIGHTBLUE}  • COINBASE: ${COINBASE}${RESET}"
 echo -e "${LIGHTBLUE}  • VALIDATOR_PRIVATE_KEY: ...${VALIDATOR_PRIVATE_KEY: -10}${RESET}"
 
+echo -e "\n${LIGHTBLUE}${BOLD}Additional Configuration:${RESET}"
+echo -e "${LIGHTBLUE}  • BLOB_SINK_ARCHIVE_API_URL: ${BLOB_SINK_ARCHIVE_API_URL}${RESET}"
+
 echo -e "\n${CYAN}${BOLD}---- CLEANING UP EXISTING INSTANCES ----${RESET}\n"
 
 # Check if there are any existing instances running
@@ -100,7 +103,8 @@ aztec start --node --archiver --sequencer \
   --sequencer.validatorPrivateKey "$VALIDATOR_PRIVATE_KEY" \
   --sequencer.coinbase "$COINBASE" \
   --p2p.p2pIp "$P2P_IP" \
-  --p2p.maxTxPoolSize 1000000000
+  --p2p.maxTxPoolSize 1000000000 \
+  --blob-sink-archive-api-url "$BLOB_SINK_ARCHIVE_API_URL"
 EOL
 
 chmod +x $HOME/start_aztec_node.sh

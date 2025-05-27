@@ -151,6 +151,9 @@ export VALIDATOR_PRIVATE_KEY="$VALIDATOR_PRIVATE_KEY"
 
 # The wallet address associated with the private key
 export COINBASE="$COINBASE"
+
+# Blob sink archive API URL (hardcoded)
+export BLOB_SINK_ARCHIVE_API_URL="https://api.blobscan.com"
 EOL
 
 # Set secure permissions
