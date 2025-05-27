@@ -45,6 +45,17 @@ fi
 
 echo -e "${GREEN}${BOLD}All required environment variables found.${RESET}"
 
+# Display current configuration (with masked private key)
+echo -e "\n${CYAN}${BOLD}---- CURRENT CONFIGURATION ----${RESET}\n"
+echo -e "${LIGHTBLUE}${BOLD}Network Configuration:${RESET}"
+echo -e "${LIGHTBLUE}  • ETHEREUM_HOSTS: ${ETHEREUM_HOSTS}${RESET}"
+echo -e "${LIGHTBLUE}  • L1_CONSENSUS_HOST_URLS: ${L1_CONSENSUS_HOST_URLS}${RESET}"
+echo -e "${LIGHTBLUE}  • P2P_IP: ${P2P_IP}${RESET}"
+
+echo -e "\n${LIGHTBLUE}${BOLD}Validator Configuration:${RESET}"
+echo -e "${LIGHTBLUE}  • COINBASE: ${COINBASE}${RESET}"
+echo -e "${LIGHTBLUE}  • VALIDATOR_PRIVATE_KEY: ...${VALIDATOR_PRIVATE_KEY: -10}${RESET}"
+
 echo -e "\n${CYAN}${BOLD}---- CLEANING UP EXISTING INSTANCES ----${RESET}\n"
 
 # Check if there are any existing instances running
