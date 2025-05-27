@@ -70,7 +70,23 @@ fi
 # Prompt for missing environment variables
 prompt_if_missing "ETHEREUM_HOSTS" "Enter Your Sepolia Ethereum RPC URL: " "Visit ${PURPLE}https://dashboard.alchemy.com/apps${RESET}${LIGHTBLUE}${BOLD} or ${PURPLE}https://developer.metamask.io/register${RESET}${LIGHTBLUE}${BOLD} to create an account and get a Sepolia RPC URL."
 
-prompt_if_missing "L1_CONSENSUS_HOST_URLS" "Enter Your Sepolia Ethereum BEACON URL: " "Visit ${PURPLE}https://chainstack.com/global-nodes${RESET}${LIGHTBLUE}${BOLD} to create an account and get beacon RPC URL."
+# Handle L1_CONSENSUS_HOST_URLS with backup URLs
+if [ -z "$L1_CONSENSUS_HOST_URLS" ]; then
+    echo -e "${LIGHTBLUE}${BOLD}Visit ${PURPLE}https://chainstack.com/global-nodes${RESET}${LIGHTBLUE}${BOLD} to create an account and get beacon RPC URL.${RESET}"
+    read -p "Enter Your Sepolia Ethereum BEACON URL: " primary_beacon_url
+    
+    if [ -n "$primary_beacon_url" ]; then
+        # Add backup URLs to the primary one
+        L1_CONSENSUS_HOST_URLS="${primary_beacon_url},https://sepolia.beaconcha.in,https://ethereum-sepolia-beacon-api.publicnode.com"
+        export L1_CONSENSUS_HOST_URLS="$L1_CONSENSUS_HOST_URLS"
+        echo "export L1_CONSENSUS_HOST_URLS=\"$L1_CONSENSUS_HOST_URLS\"" >> .env
+        echo -e "${GREEN}${BOLD}Added L1_CONSENSUS_HOST_URLS with backup endpoints${RESET}"
+    else
+        echo -e "${RED}${BOLD}No beacon URL provided${RESET}"
+    fi
+else
+    echo -e "${GREEN}${BOLD}Using existing L1_CONSENSUS_HOST_URLS${RESET}"
+fi
 
 prompt_if_missing "VALIDATOR_PRIVATE_KEY" "Enter your new evm wallet private key (with 0x prefix): " "Please create a new EVM wallet, fund it with Sepolia Faucet and then provide the private key."
 

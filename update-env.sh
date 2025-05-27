@@ -114,8 +114,28 @@ fi
 
 # Update L1_CONSENSUS_HOST_URLS
 echo -e "${CYAN}${BOLD}2. Consensus/Beacon URL${RESET}"
-if update_env_var "L1_CONSENSUS_HOST_URLS" "Enter Your Sepolia Ethereum BEACON URL: " "Visit ${PURPLE}https://chainstack.com/global-nodes${RESET}${LIGHTBLUE}${BOLD} to get beacon RPC URL."; then
+echo -e "${LIGHTBLUE}${BOLD}Visit ${PURPLE}https://chainstack.com/global-nodes${RESET}${LIGHTBLUE}${BOLD} to get beacon RPC URL.${RESET}"
+
+if [ -n "$L1_CONSENSUS_HOST_URLS" ]; then
+    echo -e "${GREEN}Current value: ${L1_CONSENSUS_HOST_URLS}${RESET}"
+    read -p "Enter Your Sepolia Ethereum BEACON URL (press Enter to keep current): " new_beacon_url
+else
+    echo -e "${PURPLE}No current value set${RESET}"
+    read -p "Enter Your Sepolia Ethereum BEACON URL: " new_beacon_url
+fi
+
+if [ -n "$new_beacon_url" ]; then
+    # Add backup URLs to the primary one
+    L1_CONSENSUS_HOST_URLS="${new_beacon_url},https://sepolia.beaconcha.in,https://ethereum-sepolia-beacon-api.publicnode.com"
+    export L1_CONSENSUS_HOST_URLS="$L1_CONSENSUS_HOST_URLS"
+    echo -e "${GREEN}${BOLD}✓ Updated L1_CONSENSUS_HOST_URLS with backup endpoints${RESET}\n"
     updated_vars+=("L1_CONSENSUS_HOST_URLS")
+else
+    if [ -n "$L1_CONSENSUS_HOST_URLS" ]; then
+        echo -e "${LIGHTBLUE}${BOLD}✓ Keeping existing L1_CONSENSUS_HOST_URLS${RESET}\n"
+    else
+        echo -e "${PURPLE}${BOLD}⚠ No value provided for L1_CONSENSUS_HOST_URLS (will be empty)${RESET}\n"
+    fi
 fi
 
 # Update VALIDATOR_PRIVATE_KEY
