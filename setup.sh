@@ -89,5 +89,36 @@ fi
 echo -e "\n${CYAN}${BOLD}---- UPDATING AZTEC TO ALPHA-TESTNET ----${RESET}\n"
 aztec-up alpha-testnet
 
+echo -e "\n${CYAN}${BOLD}---- DOWNLOADING AUTO-START SETUP SCRIPT ----${RESET}\n"
+
+# Download the setup-autostart.sh script if it doesn't exist
+if [ ! -f "setup-autostart.sh" ]; then
+    echo -e "${LIGHTBLUE}${BOLD}Downloading setup-autostart.sh script...${RESET}"
+    curl -sSL -o setup-autostart.sh https://raw.githubusercontent.com/martinc1991/aztec-node-startup-script/main/setup-autostart.sh
+    chmod +x setup-autostart.sh
+    echo -e "${GREEN}${BOLD}✓ Auto-start setup script downloaded${RESET}"
+else
+    echo -e "${GREEN}${BOLD}✓ Auto-start setup script already exists${RESET}"
+fi
+
+echo -e "\n${CYAN}${BOLD}---- OPTIONAL: AUTO-START ON BOOT SETUP ----${RESET}\n"
+echo -e "${LIGHTBLUE}${BOLD}Would you like to set up your Aztec node to automatically start when your server reboots?${RESET}"
+echo -e "${LIGHTBLUE}This is highly recommended for production servers and EC2 instances.${RESET}\n"
+echo -e "${LIGHTBLUE}This will:${RESET}"
+echo -e "${LIGHTBLUE}  • Automatically start your node when the server boots${RESET}"
+echo -e "${LIGHTBLUE}  • Restart the node if it crashes${RESET}"
+echo -e "${LIGHTBLUE}  • Provide easy management commands${RESET}\n"
+echo -e "${YELLOW}${BOLD}Set up auto-start now? (y/N): ${RESET}"
+read -p "" -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo -e "\n${LIGHTBLUE}${BOLD}Running auto-start setup...${RESET}"
+    ./setup-autostart.sh
+    echo -e "\n${GREEN}${BOLD}Auto-start setup completed!${RESET}"
+else
+    echo -e "\n${LIGHTBLUE}${BOLD}Auto-start setup skipped.${RESET}"
+    echo -e "${LIGHTBLUE}You can run it later with: ${YELLOW}./setup-autostart.sh${RESET}"
+fi
+
 echo -e "\n${GREEN}${BOLD}Setup completed successfully!${RESET}"
 echo -e "${LIGHTBLUE}${BOLD}You can now run the node configuration script: ./configure-node.sh${RESET}\n" 
