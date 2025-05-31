@@ -33,20 +33,30 @@ fi
 echo -e "\n${CYAN}${BOLD}---- STOPPING DOCKER CONTAINERS ----${RESET}\n"
 
 # Stop any existing Aztec containers
-if docker ps -q --filter "name=aztec" | grep -q .; then
+if docker ps -q --filter "name=aztec" 2>/dev/null | grep -q . || sudo docker ps -q --filter "name=aztec" 2>/dev/null | grep -q .; then
     echo -e "${LIGHTBLUE}${BOLD}Stopping existing Aztec containers...${RESET}"
-    docker stop $(docker ps -q --filter "name=aztec")
-    docker rm $(docker ps -aq --filter "name=aztec")
+    if docker ps -q --filter "name=aztec" 2>/dev/null | grep -q .; then
+        docker stop $(docker ps -q --filter "name=aztec") 2>/dev/null || true
+        docker rm $(docker ps -aq --filter "name=aztec") 2>/dev/null || true
+    else
+        sudo docker stop $(sudo docker ps -q --filter "name=aztec") 2>/dev/null || true
+        sudo docker rm $(sudo docker ps -aq --filter "name=aztec") 2>/dev/null || true
+    fi
     echo -e "${GREEN}${BOLD}Aztec containers stopped and removed.${RESET}"
 else
     echo -e "${GREEN}${BOLD}No Aztec containers found.${RESET}"
 fi
 
 # Also check for containers using the aztec image
-if docker ps -q --filter "ancestor=aztecprotocol/aztec:latest" | grep -q .; then
+if docker ps -q --filter "ancestor=aztecprotocol/aztec:latest" 2>/dev/null | grep -q . || sudo docker ps -q --filter "ancestor=aztecprotocol/aztec:latest" 2>/dev/null | grep -q .; then
     echo -e "${LIGHTBLUE}${BOLD}Stopping containers using aztecprotocol/aztec:latest image...${RESET}"
-    docker stop $(docker ps -q --filter "ancestor=aztecprotocol/aztec:latest")
-    docker rm $(docker ps -aq --filter "ancestor=aztecprotocol/aztec:latest")
+    if docker ps -q --filter "ancestor=aztecprotocol/aztec:latest" 2>/dev/null | grep -q .; then
+        docker stop $(docker ps -q --filter "ancestor=aztecprotocol/aztec:latest") 2>/dev/null || true
+        docker rm $(docker ps -aq --filter "ancestor=aztecprotocol/aztec:latest") 2>/dev/null || true
+    else
+        sudo docker stop $(sudo docker ps -q --filter "ancestor=aztecprotocol/aztec:latest") 2>/dev/null || true
+        sudo docker rm $(sudo docker ps -aq --filter "ancestor=aztecprotocol/aztec:latest") 2>/dev/null || true
+    fi
     echo -e "${GREEN}${BOLD}Aztec image containers stopped and removed.${RESET}"
 else
     echo -e "${GREEN}${BOLD}No containers using aztecprotocol/aztec:latest image found.${RESET}"

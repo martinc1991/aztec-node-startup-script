@@ -11,10 +11,54 @@ RESET='\033[0m'
 # Ensure Aztec is in PATH
 export PATH="$PATH:$HOME/.aztec/bin"
 
+# Wait for network connectivity (important for EC2 autostart)
+echo -e "${LIGHTBLUE}${BOLD}Checking network connectivity...${RESET}"
+for i in {1..30}; do
+    if curl -s --connect-timeout 5 https://api.ipify.org >/dev/null 2>&1; then
+        echo -e "${GREEN}${BOLD}Network connectivity confirmed.${RESET}"
+        break
+    fi
+    if [ $i -eq 30 ]; then
+        echo -e "${RED}${BOLD}WARNING: Network connectivity check failed after 30 attempts. Proceeding anyway...${RESET}"
+    else
+        echo -e "${YELLOW}${BOLD}Waiting for network... (attempt $i/30)${RESET}"
+        sleep 2
+    fi
+done
+
 # Check if Aztec is available
 if ! command -v aztec &> /dev/null; then
   echo -e "${RED}${BOLD}ERROR: Aztec CLI not found. Please run setup.sh first.${RESET}"
   exit 1
+fi
+
+# Check for required dependencies
+missing_deps=()
+for dep in screen curl docker; do
+    if ! command -v $dep &> /dev/null; then
+        missing_deps+=("$dep")
+    fi
+done
+
+if [ ${#missing_deps[@]} -ne 0 ]; then
+    echo -e "${RED}${BOLD}ERROR: Missing required dependencies: ${missing_deps[*]}${RESET}"
+    echo -e "${LIGHTBLUE}${BOLD}Please install missing dependencies. For Ubuntu/Debian: sudo apt-get install -y ${missing_deps[*]}${RESET}"
+    exit 1
+fi
+
+# Check if Docker daemon is running
+if ! docker info >/dev/null 2>&1 && ! sudo docker info >/dev/null 2>&1; then
+    echo -e "${YELLOW}${BOLD}Docker daemon not running. Attempting to start...${RESET}"
+    sudo systemctl start docker || {
+        echo -e "${RED}${BOLD}ERROR: Could not start Docker daemon${RESET}"
+        exit 1
+    }
+    sleep 5
+    if ! docker info >/dev/null 2>&1 && ! sudo docker info >/dev/null 2>&1; then
+        echo -e "${RED}${BOLD}ERROR: Docker daemon failed to start${RESET}"
+        exit 1
+    fi
+    echo -e "${GREEN}${BOLD}Docker daemon started successfully${RESET}"
 fi
 
 # Check if .env file exists
@@ -28,7 +72,7 @@ echo -e "${GREEN}${BOLD}Loading configuration from .env file...${RESET}"
 source .env
 
 # Verify required environment variables are set
-required_vars=("P2P_IP" "ETHEREUM_HOSTS" "L1_CONSENSUS_HOST_URLS" "VALIDATOR_PRIVATE_KEY" "COINBASE")
+required_vars=("P2P_IP" "ETHEREUM_HOSTS" "L1_CONSENSUS_HOST_URLS" "VALIDATOR_PRIVATE_KEY" "COINBASE" "BLOB_SINK_ARCHIVE_API_URL")
 missing_vars=()
 
 for var in "${required_vars[@]}"; do
@@ -62,31 +106,26 @@ echo -e "${LIGHTBLUE}  • BLOB_SINK_ARCHIVE_API_URL: ${BLOB_SINK_ARCHIVE_API_UR
 echo -e "\n${CYAN}${BOLD}---- CLEANING UP EXISTING INSTANCES ----${RESET}\n"
 
 # Check if there are any existing instances running
-existing_containers=$(docker ps -q --filter "name=aztec" 2>/dev/null || true)
+existing_containers=$(docker ps -q --filter "name=aztec" 2>/dev/null || sudo docker ps -q --filter "name=aztec" 2>/dev/null || true)
 existing_screen=$(screen -list 2>/dev/null | grep "\.aztec" || true)
 port_in_use=$(netstat -tuln 2>/dev/null | grep ":8080 " || true)
 
 if [ -n "$existing_containers" ] || [ -n "$existing_screen" ] || [ -n "$port_in_use" ]; then
-    echo -e "${LIGHTBLUE}${BOLD}Found existing Aztec instances. Do you want to stop them and start fresh? (y/N): ${RESET}"
-    read -p "" -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${LIGHTBLUE}${BOLD}Stopping existing instances...${RESET}"
-        # Check if stop-node.sh exists, if not use inline cleanup
-        if [ -f "./stop-node.sh" ]; then
-            ./stop-node.sh
-        else
-            # Fallback inline cleanup
-            [ -n "$existing_screen" ] && screen -S aztec -X quit 2>/dev/null
-            [ -n "$existing_containers" ] && docker stop $(docker ps -q --filter "name=aztec") && docker rm $(docker ps -aq --filter "name=aztec")
-            [ -n "$port_in_use" ] && sudo fuser -k 8080/tcp
-        fi
-        echo -e "${GREEN}${BOLD}Cleanup completed. Proceeding with startup.${RESET}"
+    echo -e "${LIGHTBLUE}${BOLD}Found existing Aztec instances. Cleaning up automatically for autostart...${RESET}"
+    echo -e "${LIGHTBLUE}${BOLD}Stopping existing instances...${RESET}"
+    # Check if stop-node.sh exists, if not use inline cleanup
+    if [ -f "./stop-node.sh" ]; then
+        ./stop-node.sh
     else
-        echo -e "${PURPLE}${BOLD}Keeping existing instances. You can attach to the screen session with: screen -r aztec${RESET}"
-        echo -e "${LIGHTBLUE}${BOLD}If you want to start fresh later, run: ./stop-node.sh${RESET}\n"
-        exit 0
+        # Fallback inline cleanup
+        [ -n "$existing_screen" ] && screen -S aztec -X quit 2>/dev/null
+        if [ -n "$existing_containers" ]; then
+            docker stop $(docker ps -q --filter "name=aztec") 2>/dev/null || sudo docker stop $(sudo docker ps -q --filter "name=aztec") 2>/dev/null || true
+            docker rm $(docker ps -aq --filter "name=aztec") 2>/dev/null || sudo docker rm $(sudo docker ps -aq --filter "name=aztec") 2>/dev/null || true
+        fi
+        [ -n "$port_in_use" ] && sudo fuser -k 8080/tcp 2>/dev/null || true
     fi
+    echo -e "${GREEN}${BOLD}Cleanup completed. Proceeding with startup.${RESET}"
 else
     echo -e "${GREEN}${BOLD}No existing instances found. Proceeding with startup.${RESET}"
 fi
@@ -109,4 +148,14 @@ EOL
 chmod +x $HOME/start_aztec_node.sh
 screen -dmS aztec $HOME/start_aztec_node.sh
 
-echo -e "${GREEN}${BOLD}Aztec node started successfully in a screen session.${RESET}\n" 
+# Verify the screen session started successfully
+sleep 3
+if screen -list | grep -q "\.aztec"; then
+    echo -e "${GREEN}${BOLD}Aztec node started successfully in a screen session.${RESET}"
+    echo -e "${LIGHTBLUE}${BOLD}You can attach to the session with: screen -r aztec${RESET}"
+    echo -e "${LIGHTBLUE}${BOLD}To view logs, use: screen -r aztec${RESET}"
+else
+    echo -e "${RED}${BOLD}ERROR: Failed to start screen session. Check if screen is installed.${RESET}"
+    echo -e "${LIGHTBLUE}${BOLD}You can try running the node manually: $HOME/start_aztec_node.sh${RESET}"
+    exit 1
+fi 

@@ -82,33 +82,30 @@ SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 
 print_info "Creating systemd service file..."
 
-# Determine the ExecStop command
-if [ -n "$STOP_SCRIPT" ]; then
-    EXEC_STOP="ExecStop=$STOP_SCRIPT"
-else
-    EXEC_STOP="ExecStop=/bin/kill -TERM \$MAINPID"
-fi
-
 # Create the service file content
 SERVICE_CONTENT="[Unit]
 Description=Aztec Node Auto-Start Service
-After=network-online.target
+After=network-online.target docker.service
 Wants=network-online.target
+Requires=docker.service
 
 [Service]
-Type=forking
+Type=oneshot
+RemainAfterExit=yes
 User=$CURRENT_USER
 Group=$CURRENT_USER
 WorkingDirectory=$CURRENT_DIR
+Environment=\"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$HOME/.aztec/bin\"
+Environment=\"HOME=$HOME\"
 ExecStartPre=/bin/sleep 30
-ExecStart=$START_SCRIPT
-$EXEC_STOP
+ExecStart=/bin/bash -c 'cd $CURRENT_DIR && ./start-node.sh'
+ExecStop=/bin/bash -c 'cd $CURRENT_DIR && if [ -f \"./stop-node.sh\" ]; then ./stop-node.sh; else screen -S aztec -X quit 2>/dev/null || true; fi'
 Restart=on-failure
 RestartSec=60
 StandardOutput=journal
 StandardError=journal
-TimeoutStartSec=300
-TimeoutStopSec=60
+TimeoutStartSec=600
+TimeoutStopSec=120
 
 [Install]
 WantedBy=multi-user.target"
